@@ -1,49 +1,50 @@
-# Leave Time Calculator for Raycast
+# 退勤時間計算 / Leave Time Calculator
 
-退勤時刻を計算する Raycast プラグインです。
+出勤時間を入力するだけで、退勤時間と残り時間がわかるRaycast拡張機能。
 
-## 機能
+## ✨ 機能
 
-- 開始時刻を入力すると、退勤時刻を自動計算
-- デフォルトで9時間の労働時間
-- 休憩時間も考慮（デフォルト60分）
-- 設定で労働時間と休憩時間をカスタマイズ可能
-- UI は clipboard history のような ListItem 形式
+- **📅 今日の出勤時間を保存** - 一度設定すれば、その日中ずっと退勤時間を表示
+- **⏰ リアルタイム残り時間表示** - 「あと○時間○分」をコマンドリストに動的表示
+- **✏️ カスタム時間入力** - 検索バーで `9:21` のように任意の時間を入力可能
+- **🌙 深夜シフト対応** - 日をまたぐ勤務も正しく計算
+- **🌐 日本語/英語対応** - システム言語に自動追従 or 手動設定
 
-## 使い方
+## 📸 スクリーンショット
 
-1. Raycast を開く（⌘ + Space）
-2. "Calculate Leave Time" と入力
-3. 開始時刻を選択または検索
-4. 退勤時刻が表示されます
+<!-- スクリーンショットをここに追加 -->
 
-### 設定のカスタマイズ
+## 🚀 使い方
 
-- リストの一番上の "Settings" セクションで労働時間と休憩時間を調整できます
-- Raycast の設定からデフォルト値を変更できます
+1. Raycastで拡張機能を開く
+2. 出勤時間をリストから選択（またはカスタム時間を入力）
+3. 上部の「今日の予定」に退勤時間と残り時間が表示される
+4. 日付が変わると自動的にリセット
 
-## 開発
+## ⚙️ 設定
+
+| 設定項目 | 説明 | デフォルト |
+|---------|------|-----------|
+| Default Work Hours | 1日の勤務時間 | 8時間 |
+| Default Break Minutes | 休憩時間 | 60分 |
+| Language / 言語 | 表示言語（System/English/日本語） | System |
+
+## 🛠️ 開発
 
 ```bash
-# 依存関係のインストール
+# 依存関係インストール
 bun install
 
-# 開発モードで実行（Raycast が必要）
+# 開発モード
 bun run dev
 
 # ビルド
 bun run build
+
+# Lint
+bun run lint
 ```
 
-## アイコンについて
+## 📄 ライセンス
 
-`assets/command-icon.png` に 512x512px の PNG アイコンを配置してください。
-
-## 技術スタック
-
-- Bun
-- React
-- TypeScript
-- Raycast API
-
-This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+MIT
