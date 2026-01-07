@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Action, ActionPanel, Icon, List, getPreferenceValues, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, Color, updateCommandMetadata } from "@raycast/api";
 import type { Preferences } from "./lib/types";
 import { getLanguage } from "./lib/translations";
 import { calculateLeaveTime, calculateRemainingTime } from "./lib/time-utils";
@@ -59,6 +59,23 @@ export default function Command() {
       setIsLoading(false);
     });
   }, []);
+
+  // Dynamic subtitle更新
+  useEffect(() => {
+    const updateSubtitle = async () => {
+      if (todayStart) {
+        const leave = calculateLeaveTime(todayStart, workHours, breakMins, lang);
+        const rem = calculateRemainingTime(leave, todayStart, lang);
+        const subtitle = rem.isPast
+          ? labels.finished
+          : `${leave} 退勤 - ${labels.remaining(rem.hours, rem.minutes)}`;
+        await updateCommandMetadata({ subtitle });
+      } else {
+        await updateCommandMetadata({ subtitle: "" });
+      }
+    };
+    updateSubtitle();
+  }, [todayStart, workHours, breakMins, lang]);
 
   const handleSelect = async (startTime: string) => {
     await setTodayStartTime(startTime);
