@@ -1,159 +1,166 @@
-import React, { useState } from "react";
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import React, { useState, useEffect } from "react";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, Color } from "@raycast/api";
+import type { Preferences } from "./lib/types";
+import { getLanguage } from "./lib/translations";
+import { calculateLeaveTime, calculateRemainingTime } from "./lib/time-utils";
+import { getTodayStartTime, setTodayStartTime, clearTodayStartTime } from "./lib/storage";
 
-interface Preferences {
-  defaultWorkHours: string;
-  defaultBreakMinutes: string;
-}
+const t = {
+  ja: {
+    today: "📅 今日の予定",
+    selectStart: "⏰ 出勤時間を選択",
+    remaining: (h: number, m: number) => `あと ${h}時間${m}分`,
+    finished: "お疲れ様でした！",
+    leave: (time: string) => `🏠 ${time} 退勤`,
+    start: (time: string) => `${time}`,
+    clear: "リセット",
+    settings: "⚙️ 設定",
+    workBreak: (w: number, b: number) => `勤務${w}h 休憩${b}m`,
+    searchBarPlaceholder: "時間を入力 (例: 9:21)",
+  },
+  en: {
+    today: "📅 Today",
+    selectStart: "⏰ Select Start Time",
+    remaining: (h: number, m: number) => `${h}h ${m}m left`,
+    finished: "Done for today!",
+    leave: (time: string) => `🏠 Leave at ${time}`,
+    start: (time: string) => `${time}`,
+    clear: "Reset",
+    settings: "⚙️ Settings",
+    workBreak: (w: number, b: number) => `Work ${w}h Break ${b}m`,
+    searchBarPlaceholder: "Enter time (e.g., 9:21)",
+  },
+};
 
-interface TimeOption {
-  startTime: string;
-  leaveTime: string;
-  workHours: number;
-  breakMinutes: number;
-}
-
-function parseTime(timeStr: string): Date {
-  const parts = timeStr.split(":").map(Number);
-  const hours = parts[0] ?? 0;
-  const minutes = parts[1] ?? 0;
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
-}
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
-
-function calculateLeaveTime(startTime: string, workHours: number, breakMinutes: number): string {
-  const start = parseTime(startTime);
-  const totalMinutes = workHours * 60 + breakMinutes;
-  const leave = new Date(start.getTime() + totalMinutes * 60000);
-  return formatTime(leave);
-}
-
-function generateTimeOptions(workHours: number, breakMinutes: number): TimeOption[] {
-  const options: TimeOption[] = [];
-  const startHours = [7, 8, 9, 10, 11, 12, 13];
-
-  startHours.forEach((hour) => {
-    [0, 30].forEach((minute) => {
-      const startTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-      const leaveTime = calculateLeaveTime(startTime, workHours, breakMinutes);
-      options.push({
-        startTime,
-        leaveTime,
-        workHours,
-        breakMinutes,
-      });
-    });
-  });
-
-  return options;
+function generateStartTimes(): string[] {
+  const times: string[] = [];
+  for (let h = 7; h <= 13; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      times.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+    }
+  }
+  return times;
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const defaultWorkHours = parseFloat(preferences.defaultWorkHours || "9");
-  const defaultBreakMinutes = parseInt(preferences.defaultBreakMinutes || "60");
+  const prefs = getPreferenceValues<Preferences>();
+  const workHours = parseFloat(prefs.defaultWorkHours || "8");
+  const breakMins = parseInt(prefs.defaultBreakMinutes || "60");
+  const lang = getLanguage(prefs.language || "system");
+  const labels = t[lang];
 
-  const [workHours, setWorkHours] = useState(defaultWorkHours);
-  const [breakMinutes, setBreakMinutes] = useState(defaultBreakMinutes);
+  const [todayStart, setTodayStart] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
 
-  const timeOptions = generateTimeOptions(workHours, breakMinutes);
+  useEffect(() => {
+    getTodayStartTime().then((time) => {
+      setTodayStart(time);
+      setIsLoading(false);
+    });
+  }, []);
 
-  const filteredOptions = timeOptions.filter(
-    (option) =>
-      option.startTime.includes(searchText) ||
-      option.leaveTime.includes(searchText)
-  );
+  const handleSelect = async (startTime: string) => {
+    await setTodayStartTime(startTime);
+    setTodayStart(startTime);
+  };
+
+  const handleClear = async () => {
+    await clearTodayStartTime();
+    setTodayStart(null);
+  };
+
+  // カスタム時間のパース（9:21 や 09:21 形式）
+  const parseCustomTime = (input: string): string | null => {
+    const match = input.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const h = parseInt(match[1]);
+    const m = parseInt(match[2]);
+    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  };
+
+  const customTime = parseCustomTime(searchText);
+
+  // 今日の退勤時間と残り時間を計算
+  const leaveTime = todayStart ? calculateLeaveTime(todayStart, workHours, breakMins, lang) : null;
+  const remaining = leaveTime ? calculateRemainingTime(leaveTime, todayStart, lang) : null;
+
+  const startTimes = generateStartTimes();
+  const filteredTimes = searchText
+    ? startTimes.filter((t) => t.includes(searchText))
+    : startTimes;
 
   return (
     <List
-      searchBarPlaceholder="Search start time... (e.g., 09:00)"
+      isLoading={isLoading}
+      searchBarPlaceholder={labels.searchBarPlaceholder}
       onSearchTextChange={setSearchText}
-      searchText={searchText}
-      throttle
     >
-      <List.Section title="Settings">
-        <List.Item
-          title={`Work Hours: ${workHours}h | Break: ${breakMinutes}min`}
-          subtitle="Click to adjust"
-          icon={Icon.Gear}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section title="Adjust Work Hours">
-                <Action
-                  title="Set 8 Hours"
-                  onAction={() => setWorkHours(8)}
-                  icon={Icon.Clock}
-                />
-                <Action
-                  title="Set 9 Hours (Default)"
-                  onAction={() => setWorkHours(9)}
-                  icon={Icon.Clock}
-                />
-                <Action
-                  title="Set 10 Hours"
-                  onAction={() => setWorkHours(10)}
-                  icon={Icon.Clock}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section title="Adjust Break Time">
-                <Action
-                  title="No Break"
-                  onAction={() => setBreakMinutes(0)}
-                  icon={Icon.Circle}
-                />
-                <Action
-                  title="30 Minutes"
-                  onAction={() => setBreakMinutes(30)}
-                  icon={Icon.Circle}
-                />
-                <Action
-                  title="60 Minutes (Default)"
-                  onAction={() => setBreakMinutes(60)}
-                  icon={Icon.Circle}
-                />
-                <Action
-                  title="90 Minutes"
-                  onAction={() => setBreakMinutes(90)}
-                  icon={Icon.Circle}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title="Leave Time Calculator">
-        {filteredOptions.map((option, index) => (
+      {/* 今日の予定（設定済みの場合） */}
+      {todayStart && leaveTime && remaining && (
+        <List.Section title={labels.today}>
           <List.Item
-            key={index}
-            title={option.startTime}
-            subtitle={`→ Leave at ${option.leaveTime}`}
-            icon={Icon.Clock}
+            title={labels.leave(leaveTime)}
+            subtitle={remaining.isPast ? labels.finished : labels.remaining(remaining.hours, remaining.minutes)}
+            icon={{ source: Icon.Clock, tintColor: remaining.isPast ? Color.Green : Color.Blue }}
             accessories={[
-              {
-                text: `${option.workHours}h + ${option.breakMinutes}m`,
-              },
+              { tag: { value: todayStart, color: Color.SecondaryText } },
+              { tag: { value: labels.workBreak(workHours, breakMins), color: Color.SecondaryText } },
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Leave Time"
-                  content={option.leaveTime}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Full Info"
-                  content={`Start: ${option.startTime} → Leave: ${option.leaveTime} (${option.workHours}h work + ${option.breakMinutes}m break)`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
+                <Action.CopyToClipboard title="Copy" content={leaveTime} />
+                <Action title={labels.clear} icon={Icon.Trash} style={Action.Style.Destructive} onAction={handleClear} />
               </ActionPanel>
             }
           />
-        ))}
+        </List.Section>
+      )}
+
+      {/* カスタム時間（入力が有効な場合） */}
+      {customTime && !startTimes.includes(customTime) && (
+        <List.Section title={lang === "ja" ? "✏️ カスタム時間" : "✏️ Custom Time"}>
+          <List.Item
+            title={customTime}
+            icon={{ source: Icon.Plus, tintColor: Color.Orange }}
+            accessories={[
+              { text: `→ ${calculateLeaveTime(customTime, workHours, breakMins, lang)}` },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action title="Select" icon={Icon.Check} onAction={() => handleSelect(customTime)} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
+      {/* 出勤時間選択 */}
+      <List.Section title={labels.selectStart}>
+        {filteredTimes.map((time) => {
+          const leave = calculateLeaveTime(time, workHours, breakMins, lang);
+          const rem = calculateRemainingTime(leave, time, lang);
+          const isSelected = time === todayStart;
+
+          return (
+            <List.Item
+              key={time}
+              title={labels.start(time)}
+              icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+              accessories={[
+                { text: `→ ${leave}` },
+                { tag: rem.isPast ? "✓" : labels.remaining(rem.hours, rem.minutes) },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Select" icon={Icon.Check} onAction={() => handleSelect(time)} />
+                  <Action.CopyToClipboard title="Copy Leave Time" content={leave} />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
