@@ -60,12 +60,14 @@ export default function Command() {
     });
   }, []);
 
-  // Dynamic subtitle更新
+  // Dynamic subtitle更新 + 定期更新
+  const [, setTick] = useState(0);
+
   useEffect(() => {
     const updateSubtitle = async () => {
       if (todayStart) {
         const leave = calculateLeaveTime(todayStart, workHours, breakMins, lang);
-        const rem = calculateRemainingTime(leave, todayStart, lang);
+        const rem = calculateRemainingTime(leave, null, lang);
         const subtitle = rem.isPast
           ? labels.finished
           : `${leave} 退勤 - ${labels.remaining(rem.hours, rem.minutes)}`;
@@ -75,6 +77,14 @@ export default function Command() {
       }
     };
     updateSubtitle();
+
+    // 1分ごとに更新
+    const interval = setInterval(() => {
+      updateSubtitle();
+      setTick((t) => t + 1); // UIも再レンダリング
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, [todayStart, workHours, breakMins, lang]);
 
   const handleSelect = async (startTime: string) => {
@@ -101,7 +111,7 @@ export default function Command() {
 
   // 今日の退勤時間と残り時間を計算
   const leaveTime = todayStart ? calculateLeaveTime(todayStart, workHours, breakMins, lang) : null;
-  const remaining = leaveTime ? calculateRemainingTime(leaveTime, todayStart, lang) : null;
+  const remaining = leaveTime ? calculateRemainingTime(leaveTime, null, lang) : null;
 
   const startTimes = generateStartTimes();
   const filteredTimes = searchText
@@ -157,7 +167,7 @@ export default function Command() {
       <List.Section title={labels.selectStart}>
         {filteredTimes.map((time) => {
           const leave = calculateLeaveTime(time, workHours, breakMins, lang);
-          const rem = calculateRemainingTime(leave, time, lang);
+          const rem = calculateRemainingTime(leave, null, lang);
           const isSelected = time === todayStart;
 
           return (
