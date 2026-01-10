@@ -1,54 +1,54 @@
-# Leave Time Calculator
+# 退勤時間計算 / Leave Time Calculator
 
-A Raycast extension that calculates your leaving time and remaining work hours by simply entering your arrival time.
+出勤時間を入力するだけで、退勤時間と残り時間がわかるRaycast拡張機能。
 
-## ✨ Features
+## ✨ 機能
 
-- **📅 Save Today's Arrival Time** - Set it once and see your leaving time all day long
-- **⏰ Real-time Remaining Time Display** - Dynamically shows "○ hours ○ minutes left" in the command list
-- **✏️ Custom Time Input** - Enter any time like `9:21` in the search bar
-- **🌙 Night Shift Support** - Correctly calculates shifts that span across midnight
-- **🌐 Japanese/English Support** - Auto-follows system language or manual setting
+- **📅 今日の出勤時間を保存** - 一度設定すれば、その日中ずっと退勤時間を表示
+- **⏰ リアルタイム残り時間表示** - 「あと○時間○分」をコマンドリストに動的表示
+- **✏️ カスタム時間入力** - 検索バーで `9:21` のように任意の時間を入力可能
+- **🌙 深夜シフト対応** - 日をまたぐ勤務も正しく計算
+- **🌐 日本語/英語対応** - システム言語に自動追従 or 手動設定
 
-## 📸 Screenshots
+## 📸 スクリーンショット
 
 <img width="770" height="507" alt="Image" src="https://github.com/user-attachments/assets/7edb23a2-b04a-4821-9a8a-f5767e0c9393" />
 
 <img width="762" height="495" alt="Image" src="https://github.com/user-attachments/assets/f2875a6b-9e6e-4372-9b31-d88a8d843ab8" />
 
-## 🚀 How to Use
+## 🚀 使い方
 
-1. Open the extension in Raycast
-2. Select arrival time from the list (or enter a custom time)
-3. Your leaving time and remaining hours will be displayed in "Today's Schedule" at the top
-4. Automatically resets when the date changes
+1. Raycastで拡張機能を開く
+2. 出勤時間をリストから選択（またはカスタム時間を入力）
+3. 上部の「今日の予定」に退勤時間と残り時間が表示される
+4. 日付が変わると自動的にリセット
 
-## ⚙️ Settings
+## ⚙️ 設定
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Default Work Hours | Work hours per day | 8 hours |
-| Default Break Minutes | Break time | 60 minutes |
-| Language / 言語 | Display language (System/English/日本語) | System |
+| 設定項目 | 説明 | デフォルト |
+|---------|------|-----------|
+| Default Work Hours | 1日の勤務時間 | 8時間 |
+| Default Break Minutes | 休憩時間 | 60分 |
+| Language / 言語 | 表示言語（System/English/日本語） | System |
 
 <img width="996" height="557" alt="Image" src="https://github.com/user-attachments/assets/544cb56b-db54-437a-baea-31c9b1b9872b" />
 
-## 🛠️ Development
+## 🛠️ 開発
 
 ```bash
-# Install dependencies
+# 依存関係インストール
 bun install
 
-# Development mode
+# 開発モード
 bun run dev
 
-# Build
+# ビルド
 bun run build
 
 # Lint
 bun run lint
 ```
 
-## 📄 License
+## 📄 ライセンス
 
 [MIT](LICENSE)
