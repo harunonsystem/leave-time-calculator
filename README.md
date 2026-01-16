@@ -6,6 +6,7 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 
 - **📅 Save Today's Arrival Time** - Set it once and see your leaving time all day long
 - **⏰ Real-time Remaining Time Display** - Dynamically shows "○ hours ○ minutes left" in the command list
+- **⏱️ Overtime Display** - After the scheduled leave time, shows "○ hours ○ minutes overtime"
 - **✏️ Custom Time Input** - Enter any time like `9:21` in the search bar
 - **🌙 Night Shift Support** - Correctly calculates shifts that span across midnight
 - **🌐 Japanese/English Support** - Auto-follows system language or manual setting
@@ -42,11 +43,17 @@ bun install
 # Development mode
 bun run dev
 
+# Run tests
+bun run test
+
+# Lint & format check
+bun run check
+
+# Auto-format
+bun run format
+
 # Build
 bun run build
-
-# Lint
-bun run lint
 ```
 
 ## 📄 License
