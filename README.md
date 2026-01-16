@@ -13,9 +13,9 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 
 ## 📸 Screenshots
 
-<img width="770" height="507" alt="Image" src="https://github.com/user-attachments/assets/7edb23a2-b04a-4821-9a8a-f5767e0c9393" />
+<img width="770" height="507" alt="Image" src="media/en/top.png" />
 
-<img width="762" height="495" alt="Image" src="https://github.com/user-attachments/assets/f2875a6b-9e6e-4372-9b31-d88a8d843ab8" />
+<img width="762" height="495" alt="Image" src="media/en/detail.png" />
 
 ## 🚀 How to Use
 
@@ -32,7 +32,7 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 | Default Break Minutes | Break time | 60 minutes |
 | Language / 言語 | Display language (System/English/日本語) | System |
 
-<img width="996" height="557" alt="Image" src="https://github.com/user-attachments/assets/544cb56b-db54-437a-baea-31c9b1b9872b" />
+<img width="996" height="557" alt="Image" src="media/en/config.png" />
 
 ## 🛠️ Development
 
