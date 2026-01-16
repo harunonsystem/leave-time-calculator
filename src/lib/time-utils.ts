@@ -37,16 +37,21 @@ export function calculateRemainingTime(
 ): { hours: number; minutes: number; isPast: boolean; formatted: string } {
   const now = new Date();
   let leave = parseTime(leaveTime);
-  
+
   // 出勤時間がある場合、退勤が出勤より前なら翌日と判断
   if (startTime) {
     const start = parseTime(startTime);
     if (leave < start) {
-      // 翌日に退勤
-      leave = new Date(leave.getTime() + 24 * 60 * 60 * 1000);
+      // 退勤時刻が出勤時刻より前 = 日をまたぐシフト
+      // ただし、今が出勤時刻より前（深夜帯）なら、すでに翌日にいるので+24時間は不要
+      if (now >= start) {
+        // まだ出勤日の日中〜夜 → 退勤は明日
+        leave = new Date(leave.getTime() + 24 * 60 * 60 * 1000);
+      }
+      // now < start の場合: 深夜帯にいる → leaveはそのまま今日
     }
   }
-  
+
   const diffMs = leave.getTime() - now.getTime();
   const isPast = diffMs < 0;
   const absDiffMs = Math.abs(diffMs);
@@ -55,9 +60,9 @@ export function calculateRemainingTime(
 
   let formatted: string;
   if (lang === "ja") {
-    formatted = isPast ? `${hours}時間${minutes}分前に終了` : `あと ${hours}時間${minutes}分`;
+    formatted = isPast ? `${hours}時間${minutes}分 残業中` : `あと ${hours}時間${minutes}分`;
   } else {
-    formatted = isPast ? `Ended ${hours}h ${minutes}m ago` : `${hours}h ${minutes}m left`;
+    formatted = isPast ? `${hours}h ${minutes}m overtime` : `${hours}h ${minutes}m left`;
   }
 
   return { hours, minutes, isPast, formatted };

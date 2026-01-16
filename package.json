@@ -5,7 +5,9 @@
   "description": "Calculate your leave time based on start time and break duration / 出勤時間から退勤時間を計算",
   "icon": "command-icon.png",
   "author": "harunonsystem",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -39,9 +41,18 @@
           "description": "Display language (System: auto-detect from macOS)",
           "default": "system",
           "data": [
-            { "title": "System / システム設定", "value": "system" },
-            { "title": "English", "value": "en" },
-            { "title": "日本語", "value": "ja" }
+            {
+              "title": "System / システム設定",
+              "value": "system"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "日本語",
+              "value": "ja"
+            }
           ]
         }
       ]
@@ -56,12 +67,14 @@
     "@types/bun": "latest",
     "@types/node": "^20.17.6",
     "@types/react": "^19.2.7",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.17"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "vitest"
   }
 }

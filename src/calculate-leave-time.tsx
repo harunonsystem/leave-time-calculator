@@ -10,7 +10,7 @@ const t = {
     today: "📅 今日の予定",
     selectStart: "⏰ 出勤時間を選択",
     remaining: (h: number, m: number) => `あと ${h}時間${m}分`,
-    finished: "お疲れ様でした！",
+    overtime: (h: number, m: number) => `${h}時間${m}分 残業中`,
     leave: (time: string) => `🏠 ${time} 退勤`,
     start: (time: string) => `${time}`,
     clear: "リセット",
@@ -22,7 +22,7 @@ const t = {
     today: "📅 Today",
     selectStart: "⏰ Select Start Time",
     remaining: (h: number, m: number) => `${h}h ${m}m left`,
-    finished: "Done for today!",
+    overtime: (h: number, m: number) => `${h}h ${m}m overtime`,
     leave: (time: string) => `🏠 Leave at ${time}`,
     start: (time: string) => `${time}`,
     clear: "Reset",
@@ -67,9 +67,9 @@ export default function Command() {
     const updateSubtitle = async () => {
       if (todayStart) {
         const leave = calculateLeaveTime(todayStart, workHours, breakMins, lang);
-        const rem = calculateRemainingTime(leave, null, lang);
+        const rem = calculateRemainingTime(leave, todayStart, lang);
         const subtitle = rem.isPast
-          ? labels.finished
+          ? labels.overtime(rem.hours, rem.minutes)
           : `${leave} 退勤 - ${labels.remaining(rem.hours, rem.minutes)}`;
         await updateCommandMetadata({ subtitle });
       } else {
@@ -111,7 +111,7 @@ export default function Command() {
 
   // 今日の退勤時間と残り時間を計算
   const leaveTime = todayStart ? calculateLeaveTime(todayStart, workHours, breakMins, lang) : null;
-  const remaining = leaveTime ? calculateRemainingTime(leaveTime, null, lang) : null;
+  const remaining = leaveTime ? calculateRemainingTime(leaveTime, todayStart, lang) : null;
 
   const startTimes = generateStartTimes();
   const filteredTimes = searchText
@@ -129,8 +129,8 @@ export default function Command() {
         <List.Section title={labels.today}>
           <List.Item
             title={labels.leave(leaveTime)}
-            subtitle={remaining.isPast ? labels.finished : labels.remaining(remaining.hours, remaining.minutes)}
-            icon={{ source: Icon.Clock, tintColor: remaining.isPast ? Color.Green : Color.Blue }}
+            subtitle={remaining.isPast ? labels.overtime(remaining.hours, remaining.minutes) : labels.remaining(remaining.hours, remaining.minutes)}
+            icon={{ source: Icon.Clock, tintColor: remaining.isPast ? Color.Orange : Color.Blue }}
             accessories={[
               { tag: { value: todayStart, color: Color.SecondaryText } },
               { tag: { value: labels.workBreak(workHours, breakMins), color: Color.SecondaryText } },
