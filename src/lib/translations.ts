@@ -2,6 +2,27 @@ import type { Language } from "./types";
 
 export const translations = {
   ja: {
+    // Section titles
+    todaySection: "📅 今日の予定",
+    selectStartSection: "⏰ 出勤時間を選択",
+    customTimeSection: "✏️ カスタム時間",
+
+    // Time display
+    remaining: (h: number, m: number) => `あと ${h}時間${m}分`,
+    overtime: (h: number, m: number) => `${h}時間${m}分 残業中`,
+    leaveDisplay: (time: string) => `🏠 ${time} 退勤`,
+    startDisplay: (time: string) => `${time}`,
+    workBreakTag: (w: number, b: number) => `勤務${w}h 休憩${b}m`,
+
+    // Actions
+    reset: "リセット",
+    select: "選択",
+    copyLeaveTime: "退勤時間をコピー",
+
+    // Search
+    searchBarPlaceholder: "時間を入力 (例: 9:21)",
+
+    // Legacy (for backward compatibility)
     searchPlaceholder: "出勤時間を検索... (例: 09:00)",
     settings: "設定",
     currentTime: "現在時刻",
@@ -23,12 +44,32 @@ export const translations = {
     leaveTimeCalculator: "退勤時間一覧",
     startAt: (time: string) => `${time} 出勤`,
     leaveAt: (time: string) => `${time} 退勤`,
-    copyLeaveTime: "退勤時間をコピー",
     copyFullInfo: "詳細をコピー",
     fullInfoFormat: (start: string, leave: string, workHours: number, breakMinutes: number) =>
       `出勤: ${start} → 退勤: ${leave} (勤務${workHours}時間 + 休憩${breakMinutes}分)`,
   },
   en: {
+    // Section titles
+    todaySection: "📅 Today",
+    selectStartSection: "⏰ Select Start Time",
+    customTimeSection: "✏️ Custom Time",
+
+    // Time display
+    remaining: (h: number, m: number) => `${h}h ${m}m left`,
+    overtime: (h: number, m: number) => `${h}h ${m}m overtime`,
+    leaveDisplay: (time: string) => `🏠 Leave at ${time}`,
+    startDisplay: (time: string) => `${time}`,
+    workBreakTag: (w: number, b: number) => `Work ${w}h Break ${b}m`,
+
+    // Actions
+    reset: "Reset",
+    select: "Select",
+    copyLeaveTime: "Copy Leave Time",
+
+    // Search
+    searchBarPlaceholder: "Enter time (e.g., 9:21)",
+
+    // Legacy (for backward compatibility)
     searchPlaceholder: "Search start time... (e.g., 09:00)",
     settings: "Settings",
     currentTime: "Current Time",
@@ -50,7 +91,6 @@ export const translations = {
     leaveTimeCalculator: "Leave Time List",
     startAt: (time: string) => `Start ${time}`,
     leaveAt: (time: string) => `Leave ${time}`,
-    copyLeaveTime: "Copy Leave Time",
     copyFullInfo: "Copy Full Info",
     fullInfoFormat: (start: string, leave: string, workHours: number, breakMinutes: number) =>
       `Start: ${start} → Leave: ${leave} (${workHours}h work + ${breakMinutes}m break)`,

@@ -246,7 +246,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("通常勤務: 15:00に18:00退勤まであと3時間", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 15, 0, 0)); // 15:00
-        const result = calculateRemainingTime("18:00", "09:00", "ja");
+        const result = calculateRemainingTime("18:00", "09:00");
         expect(result.hours).toBe(3);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(false);
@@ -254,7 +254,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("退勤後: 19:00に18:00退勤は1時間経過", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 19, 0, 0)); // 19:00
-        const result = calculateRemainingTime("18:00", "09:00", "ja");
+        const result = calculateRemainingTime("18:00", "09:00");
         expect(result.hours).toBe(1);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(true);
@@ -262,7 +262,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("夜勤: 20:00（出勤後）に04:00退勤まであと8時間", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 20, 0, 0)); // 20:00（出勤19:00の後）
-        const result = calculateRemainingTime("04:00", "19:00", "ja");
+        const result = calculateRemainingTime("04:00", "19:00");
         expect(result.hours).toBe(8);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(false);
@@ -270,7 +270,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("夜勤深夜帯: 01:10に04:00退勤まであと約3時間（+24時間されない）", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 1, 10, 0)); // 01:10（深夜）
-        const result = calculateRemainingTime("04:00", "19:00", "ja");
+        const result = calculateRemainingTime("04:00", "19:00");
         expect(result.hours).toBe(2);
         expect(result.minutes).toBe(50);
         expect(result.isPast).toBe(false);
@@ -278,7 +278,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("夜勤深夜帯: 05:00に04:00退勤は1時間経過", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 5, 0, 0)); // 05:00（退勤後）
-        const result = calculateRemainingTime("04:00", "19:00", "ja");
+        const result = calculateRemainingTime("04:00", "19:00");
         expect(result.hours).toBe(1);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(true);
@@ -286,7 +286,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("startTimeなしでは日をまたぐ判定をしない", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 1, 10, 0)); // 01:10
-        const result = calculateRemainingTime("04:00", null, "ja");
+        const result = calculateRemainingTime("04:00", null);
         expect(result.hours).toBe(2);
         expect(result.minutes).toBe(50);
         expect(result.isPast).toBe(false);
@@ -294,7 +294,7 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("22:00出勤 → 07:00退勤、現在23:00であと8時間", () => {
         vi.setSystemTime(new Date(2026, 0, 16, 23, 0, 0)); // 23:00
-        const result = calculateRemainingTime("07:00", "22:00", "ja");
+        const result = calculateRemainingTime("07:00", "22:00");
         expect(result.hours).toBe(8);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(false);
@@ -302,40 +302,9 @@ describe("calculateRemainingTime - 時刻モック使用", () => {
 
     test("22:00出勤 → 07:00退勤、現在03:00であと4時間", () => {
         vi.setSystemTime(new Date(2026, 0, 17, 3, 0, 0)); // 翌日03:00
-        const result = calculateRemainingTime("07:00", "22:00", "ja");
+        const result = calculateRemainingTime("07:00", "22:00");
         expect(result.hours).toBe(4);
         expect(result.minutes).toBe(0);
         expect(result.isPast).toBe(false);
-    });
-});
-
-describe("calculateRemainingTime - フォーマット", () => {
-    beforeEach(() => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date(2026, 0, 16, 15, 30, 0)); // 15:30
-    });
-
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
-    test("日本語フォーマット（未来）", () => {
-        const result = calculateRemainingTime("18:00", "09:00", "ja");
-        expect(result.formatted).toBe("あと 2時間30分");
-    });
-
-    test("日本語フォーマット（過去=残業中）", () => {
-        const result = calculateRemainingTime("14:00", "09:00", "ja");
-        expect(result.formatted).toBe("1時間30分 残業中");
-    });
-
-    test("英語フォーマット（未来）", () => {
-        const result = calculateRemainingTime("18:00", "09:00", "en");
-        expect(result.formatted).toBe("2h 30m left");
-    });
-
-    test("英語フォーマット（過去=overtime）", () => {
-        const result = calculateRemainingTime("14:00", "09:00", "en");
-        expect(result.formatted).toBe("1h 30m overtime");
     });
 });

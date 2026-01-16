@@ -32,9 +32,8 @@ export function calculateLeaveTime(
 
 export function calculateRemainingTime(
   leaveTime: string,
-  startTime: string | null,
-  lang: Language
-): { hours: number; minutes: number; isPast: boolean; formatted: string } {
+  startTime: string | null
+): { hours: number; minutes: number; isPast: boolean } {
   const now = new Date();
   let leave = parseTime(leaveTime);
 
@@ -58,18 +57,16 @@ export function calculateRemainingTime(
   const hours = Math.floor(absDiffMs / (1000 * 60 * 60));
   const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  let formatted: string;
-  if (lang === "ja") {
-    formatted = isPast ? `${hours}時間${minutes}分 残業中` : `あと ${hours}時間${minutes}分`;
-  } else {
-    formatted = isPast ? `${hours}h ${minutes}m overtime` : `${hours}h ${minutes}m left`;
-  }
-
-  return { hours, minutes, isPast, formatted };
+  return { hours, minutes, isPast };
 }
 
 const START_HOURS = [7, 8, 9, 10, 11, 12, 13] as const;
 const MINUTE_OPTIONS = [0, 15, 30, 45] as const;
+
+/** HH:MM形式の時間文字列を生成 */
+export function formatTimeString(hours: number, minutes: number): string {
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
 
 export function generateTimeOptions(
   workHours: number,
@@ -78,7 +75,7 @@ export function generateTimeOptions(
 ): TimeOption[] {
   return START_HOURS.flatMap((hour) =>
     MINUTE_OPTIONS.map((minute) => {
-      const startTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+      const startTime = formatTimeString(hour, minute);
       return {
         startTime,
         leaveTime: calculateLeaveTime(startTime, workHours, breakMinutes, lang),
