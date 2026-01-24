@@ -13,7 +13,7 @@
 		{
 			"name": "calculate-leave-time",
 			"title": "Calculate Leave Time",
-			"description": "Enter start time and calculate when to leave work",
+			"description": "Shows leave time and remaining time in subtitle",
 			"mode": "view",
 			"interval": "1m",
 			"preferences": [

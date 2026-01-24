@@ -13,9 +13,9 @@
 
 ## 📸 スクリーンショット
 
-<img width="770" height="507" alt="Image" src="media/ja/top.png" />
+<img width="770" height="507" alt="Image" src="metadata/ja/top.png" />
 
-<img width="762" height="495" alt="Image" src="media/ja/detail.png" />
+<img width="762" height="495" alt="Image" src="metadata/ja/detail.png" />
 
 ## 🚀 使い方
 
@@ -32,7 +32,7 @@
 | Default Break Minutes | 休憩時間 | 60分 |
 | Language / 言語 | 表示言語（System/English/日本語） | System |
 
-<img width="996" height="557" alt="Image" src="media/ja/config.png" />
+<img width="996" height="557" alt="Image" src="metadata/ja/config.png" />
 
 ## 🛠️ 開発
 

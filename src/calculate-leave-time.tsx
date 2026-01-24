@@ -19,7 +19,12 @@ import {
 	formatTimeString,
 } from "./lib/time-utils";
 import { getLanguage, useTranslations } from "./lib/translations";
-import type { Preferences } from "./lib/types";
+
+// 現在時刻を HH:MM 形式で取得
+const getCurrentTimeString = () => {
+	const now = new Date();
+	return formatTimeString(now.getHours(), now.getMinutes());
+};
 
 // コンポーネント外で1度だけ生成（パフォーマンス最適化）
 const START_TIMES = (() => {
@@ -33,7 +38,7 @@ const START_TIMES = (() => {
 })();
 
 export default function Command() {
-	const prefs = getPreferenceValues<Preferences>();
+	const prefs = getPreferenceValues<Preferences.CalculateLeaveTime>();
 	const workHours = parseFloat(prefs.defaultWorkHours || "8");
 	const breakMins = parseInt(prefs.defaultBreakMinutes || "60", 10);
 	const lang = getLanguage(prefs.language || "system");
@@ -49,6 +54,9 @@ export default function Command() {
 			setIsLoading(false);
 		});
 	}, []);
+
+	// 現在時刻（1分ごとに更新）
+	const [currentTime, setCurrentTime] = useState(getCurrentTimeString);
 
 	// Dynamic subtitle更新 + 定期更新
 	const [, setTick] = useState(0);
@@ -76,6 +84,7 @@ export default function Command() {
 		// 1分ごとに更新
 		const interval = setInterval(() => {
 			updateSubtitle();
+			setCurrentTime(getCurrentTimeString());
 			setTick((tick) => tick + 1); // UIも再レンダリング
 		}, 60000);
 
@@ -153,6 +162,39 @@ export default function Command() {
 									icon={Icon.Trash}
 									style={Action.Style.Destructive}
 									onAction={handleClear}
+								/>
+							</ActionPanel>
+						}
+					/>
+				</List.Section>
+			)}
+
+			{/* 今すぐ出勤（現在時刻） */}
+			{!searchText && (
+				<List.Section title={t.nowSection}>
+					<List.Item
+						title={t.startNow(currentTime)}
+						icon={{ source: Icon.Clock, tintColor: Color.Green }}
+						accessories={[
+							{
+								text: `→ ${calculateLeaveTime(currentTime, workHours, breakMins, lang)}`,
+							},
+						]}
+						actions={
+							<ActionPanel>
+								<Action
+									title={t.select}
+									icon={Icon.Check}
+									onAction={() => handleSelect(currentTime)}
+								/>
+								<Action.CopyToClipboard
+									title={t.copyLeaveTime}
+									content={calculateLeaveTime(
+										currentTime,
+										workHours,
+										breakMins,
+										lang,
+									)}
 								/>
 							</ActionPanel>
 						}
