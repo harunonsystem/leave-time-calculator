@@ -18,9 +18,7 @@ declare namespace Preferences {
   /** Default Work Hours - Default work hours per day (e.g., 8, 9) */
   "defaultWorkHours": string,
   /** Default Break Minutes - Default break time in minutes (e.g., 60) */
-  "defaultBreakMinutes": string,
-  /** Language / 言語 - Display language (System: auto-detect from macOS) */
-  "language": "system" | "en" | "ja"
+  "defaultBreakMinutes": string
 }
 }
 
