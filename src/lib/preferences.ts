@@ -11,8 +11,10 @@ type CommandPreferences = Preferences.CalculateLeaveTime;
 
 export function getWorkPreferences(): WorkPreferences {
 	const prefs = getPreferenceValues<CommandPreferences>();
+	const workHours = parseFloat(prefs.defaultWorkHours);
+	const breakMinutes = parseInt(prefs.defaultBreakMinutes, 10);
 	return {
-		workHours: parseFloat(prefs.defaultWorkHours || "8"),
-		breakMinutes: parseInt(prefs.defaultBreakMinutes || "60", 10),
+		workHours: Number.isNaN(workHours) ? 8 : workHours,
+		breakMinutes: Number.isNaN(breakMinutes) ? 60 : breakMinutes,
 	};
 }
