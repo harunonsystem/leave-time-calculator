@@ -7,7 +7,7 @@ import {
 	List,
 	launchCommand,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { buildLeaveStatus, formatRemainingLabel } from "./lib/leave-status";
 import { getWorkPreferences } from "./lib/preferences";
 import {
