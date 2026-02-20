@@ -13,9 +13,33 @@
 		{
 			"name": "calculate-leave-time",
 			"title": "Calculate Leave Time",
-			"description": "Shows leave time and remaining time in subtitle",
-			"mode": "view",
+			"description": "Main command. Auto-updates subtitle and opens the editor view",
+			"mode": "no-view",
 			"interval": "1m",
+			"preferences": [
+				{
+					"name": "defaultWorkHours",
+					"type": "textfield",
+					"required": false,
+					"title": "Default Work Hours",
+					"description": "Default work hours per day (e.g., 8, 9)",
+					"default": "8"
+				},
+				{
+					"name": "defaultBreakMinutes",
+					"type": "textfield",
+					"required": false,
+					"title": "Default Break Minutes",
+					"description": "Default break time in minutes (e.g., 60)",
+					"default": "60"
+				}
+			]
+		},
+		{
+			"name": "calculate-leave-time-view",
+			"title": "Calculate Leave Time (Internal View)",
+			"description": "Internal editor view opened from the main command",
+			"mode": "view",
 			"preferences": [
 				{
 					"name": "defaultWorkHours",

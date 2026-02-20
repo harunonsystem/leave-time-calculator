@@ -20,10 +20,19 @@ declare namespace Preferences {
   /** Default Break Minutes - Default break time in minutes (e.g., 60) */
   "defaultBreakMinutes": string
 }
+  /** Preferences accessible in the `calculate-leave-time-view` command */
+  export type CalculateLeaveTimeView = ExtensionPreferences & {
+  /** Default Work Hours - Default work hours per day (e.g., 8, 9) */
+  "defaultWorkHours": string,
+  /** Default Break Minutes - Default break time in minutes (e.g., 60) */
+  "defaultBreakMinutes": string
+}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `calculate-leave-time` command */
   export type CalculateLeaveTime = {}
+  /** Arguments passed to the `calculate-leave-time-view` command */
+  export type CalculateLeaveTimeView = {}
 }
 

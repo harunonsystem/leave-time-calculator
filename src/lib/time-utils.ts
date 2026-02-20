@@ -9,6 +9,25 @@ function parseTime(timeStr: string): Date {
 	return date;
 }
 
+function getReferenceNow(currentTime?: string): Date {
+	const now = new Date();
+
+	// Prefer UI-displayed time when provided so remaining time matches what users see.
+	if (currentTime) {
+		const parts = currentTime.split(":").map(Number);
+		const hours = parts[0];
+		const minutes = parts[1];
+		if (!Number.isNaN(hours) && !Number.isNaN(minutes)) {
+			now.setHours(hours, minutes, 0, 0);
+			return now;
+		}
+	}
+
+	// Round down to minute precision to avoid showing one minute less due to seconds.
+	now.setSeconds(0, 0);
+	return now;
+}
+
 export function formatTime(date: Date): string {
 	return formatTimeString(date.getHours(), date.getMinutes());
 }
@@ -31,8 +50,9 @@ export function calculateLeaveTime(
 export function calculateRemainingTime(
 	leaveTime: string,
 	startTime: string | null,
+	currentTime?: string,
 ): { hours: number; minutes: number; isPast: boolean } {
-	const now = new Date();
+	const now = getReferenceNow(currentTime);
 	let leave = parseTime(leaveTime);
 
 	// If start time is provided and leave time < start time, treat as overnight shift

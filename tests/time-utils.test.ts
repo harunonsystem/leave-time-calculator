@@ -312,4 +312,20 @@ describe("calculateRemainingTime - with mocked time", () => {
 		expect(result.minutes).toBe(0);
 		expect(result.isPast).toBe(false);
 	});
+
+	test("with currentTime input, ignores current seconds and keeps minute-aligned result", () => {
+		vi.setSystemTime(new Date(2026, 0, 16, 9, 0, 59)); // 09:00:59
+		const result = calculateRemainingTime("18:00", "09:00", "09:00");
+		expect(result.hours).toBe(9);
+		expect(result.minutes).toBe(0);
+		expect(result.isPast).toBe(false);
+	});
+
+	test("without currentTime input, rounds now down to minute precision", () => {
+		vi.setSystemTime(new Date(2026, 0, 16, 9, 0, 59)); // 09:00:59
+		const result = calculateRemainingTime("18:00", "09:00");
+		expect(result.hours).toBe(9);
+		expect(result.minutes).toBe(0);
+		expect(result.isPast).toBe(false);
+	});
 });
