@@ -14,9 +14,8 @@ bun run build      # Build for production
 bun run test       # Run tests with vitest
 bun run test -- tests/time-utils.test.ts  # Run specific test file
 bun run test -- -t "calculateLeaveTime"   # Run tests matching pattern
-bun run lint       # Raycast lint (ray lint)
-bun run check      # Lint & format check (Biome)
-bun run format     # Auto-format with Biome
+bun run lint       # Lint (ray lint / ESLint + Prettier)
+bun run fix-lint   # Lint auto-fix (ray lint --fix)
 ```
 
 ## Architecture
@@ -35,7 +34,7 @@ bun run format     # Auto-format with Biome
 
 - `@raycast/api` - Raycast extension framework
 - `vitest` - Test runner (not bun test)
-- `@biomejs/biome` - Linting and formatting
+- `@raycast/eslint-config` - Linting and formatting (ESLint + Prettier)
 
 ## Development Guidelines
 

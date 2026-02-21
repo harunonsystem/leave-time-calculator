@@ -30,8 +30,6 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 | Default Work Hours    | Work hours per day | 8 hours    |
 | Default Break Minutes | Break time         | 60 minutes |
 
-<img width="996" height="557" alt="Image" src="metadata/en/config.png" />
-
 ## 🛠️ Development
 
 ```bash
@@ -44,11 +42,11 @@ bun run dev
 # Run tests
 bun run test
 
-# Lint & format check
-bun run check
+# Lint
+bun run lint
 
-# Auto-format
-bun run format
+# Lint & auto-fix
+bun run fix-lint
 
 # Build
 bun run build
