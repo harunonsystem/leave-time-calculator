@@ -12,9 +12,9 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 
 ## 📸 Screenshots
 
-<img width="770" height="507" alt="Image" src="metadata/en/top.png" />
+<img width="770" height="507" alt="Image" src="metadata/top.png" />
 
-<img width="762" height="495" alt="Image" src="metadata/en/detail.png" />
+<img width="762" height="495" alt="Image" src="metadata/detail.png" />
 
 ## 🚀 How to Use
 
@@ -34,22 +34,22 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Development mode
-bun run dev
+npm run dev
 
 # Run tests
-bun run test
+npm run test
 
 # Lint
-bun run lint
+npm run lint
 
 # Lint & auto-fix
-bun run fix-lint
+npm run fix-lint
 
 # Build
-bun run build
+npm run build
 ```
 
 ## 📄 License
