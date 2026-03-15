@@ -1,6 +1,50 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":semanticCommits"
+  ],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 4am on Monday"],
+  "minimumReleaseAge": "3 days",
+  "automerge": true,
+  "platformAutomerge": true,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Security updates: immediate, no waiting",
+      "matchUpdateTypes": ["pin", "digest"],
+      "minimumReleaseAge": "0 days",
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Major updates: manual review, monthly",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "minimumReleaseAge": "14 days",
+      "schedule": ["before 4am on the first day of the month"]
+    },
+    {
+      "description": "Raycast ecosystem",
+      "matchPackageNames": ["@raycast/api", "@raycast/utils", "@raycast/eslint-config"],
+      "groupName": "raycast"
+    },
+    {
+      "description": "TypeScript & types",
+      "matchPackageNames": ["typescript", "@types/node", "@types/react", "@types/bun"],
+      "groupName": "typescript"
+    },
+    {
+      "description": "Testing",
+      "matchPackageNames": ["vitest"],
+      "groupName": "testing"
+    },
+    {
+      "description": "GitHub Actions monthly",
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "7 days",
+      "schedule": ["before 4am on the first day of the month"]
+    }
   ]
 }
