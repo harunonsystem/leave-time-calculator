@@ -1,104 +1,57 @@
+import { Color, Icon, List } from "@raycast/api";
+import React, { useState } from "react";
+import { SelectStartTimeActions, TodayActions } from "./lib/leave-action-panel";
 import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  LaunchType,
-  List,
-  launchCommand,
-} from "@raycast/api";
-import React, { useEffect, useState } from "react";
-import { buildLeaveStatus, formatRemainingLabel } from "./lib/leave-status";
+  buildLeaveStatusFromPreferences,
+  formatRemainingLabel,
+  leavePreviewAccessory,
+} from "./lib/leave-status";
 import { getWorkPreferences } from "./lib/preferences";
-import {
-  clearTodayStartTime,
-  getTodayStartTime,
-  setTodayStartTime,
-} from "./lib/storage";
-import { calculateLeaveTime, formatTimeString } from "./lib/time-utils";
+import { refreshTopCommandSubtitle } from "./lib/subtitle";
+import { buildDefaultStartTimes, parseCustomTime } from "./lib/time-utils";
+import { useCurrentTime } from "./lib/use-current-time";
+import { useTodayStartTime } from "./lib/use-today-start-time";
 
-// Get current time in HH:MM format
-const getCurrentTimeString = () => {
-  const now = new Date();
-  return formatTimeString(now.getHours(), now.getMinutes());
-};
-
-// Generate once outside component (performance optimization)
-const START_TIMES = (() => {
-  const times: string[] = [];
-  for (let h = 7; h <= 13; h++) {
-    for (const m of [0, 15, 30, 45]) {
-      times.push(formatTimeString(h, m));
-    }
-  }
-  return times;
-})();
-
-async function refreshTopCommandSubtitle() {
-  await launchCommand({
-    name: "calculate-leave-time",
-    type: LaunchType.Background,
-  });
-}
+const START_TIMES = buildDefaultStartTimes();
 
 export default function Command() {
-  const { workHours, breakMinutes } = getWorkPreferences();
-
-  const [todayStart, setTodayStart] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const preferences = getWorkPreferences();
+  const { todayStart, isLoading, selectStartTime, clearStartTime } =
+    useTodayStartTime();
   const [searchText, setSearchText] = useState("");
-
-  useEffect(() => {
-    getTodayStartTime().then((time) => {
-      setTodayStart(time);
-      setIsLoading(false);
-    });
-  }, []);
-
-  // Current time (updated every minute — display is HH:MM precision)
-  const [currentTime, setCurrentTime] = useState(getCurrentTimeString);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(getCurrentTimeString());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const currentTime = useCurrentTime();
 
   const handleSelect = async (startTime: string) => {
-    await setTodayStartTime(startTime);
-    setTodayStart(startTime);
+    await selectStartTime(startTime);
     await refreshTopCommandSubtitle();
   };
 
   const handleClear = async () => {
-    await clearTodayStartTime();
-    setTodayStart(null);
+    await clearStartTime();
     await refreshTopCommandSubtitle();
   };
 
-  // Parse custom time (formats: 9:21 or 09:21)
-  const parseCustomTime = (input: string): string | null => {
-    const match = input.match(/^(\d{1,2}):(\d{2})$/);
-    if (!match) return null;
-    const h = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10);
-    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
-    return formatTimeString(h, m);
-  };
-
-  const customTime = parseCustomTime(searchText);
-
-  // Calculate today's leave time and remaining time
-  const todayStatus = todayStart
-    ? buildLeaveStatus(todayStart, workHours, breakMinutes, currentTime)
+  const parsedCustomTime = parseCustomTime(searchText);
+  const customStartTime =
+    parsedCustomTime && !START_TIMES.includes(parsedCustomTime)
+      ? parsedCustomTime
+      : null;
+  const customStatus = customStartTime
+    ? buildLeaveStatusFromPreferences(customStartTime, preferences, currentTime)
     : null;
-  const leaveTime = todayStatus?.leaveTime ?? null;
-  const remaining = todayStatus?.remaining ?? null;
+  const todayStatus = todayStart
+    ? buildLeaveStatusFromPreferences(todayStart, preferences, currentTime)
+    : null;
 
   const filteredTimes = searchText
     ? START_TIMES.filter((time) => time.includes(searchText))
     : START_TIMES;
+
+  const nowStatus = buildLeaveStatusFromPreferences(
+    currentTime,
+    preferences,
+    currentTime,
+  );
 
   return (
     <List
@@ -106,107 +59,77 @@ export default function Command() {
       searchBarPlaceholder="Enter time (e.g., 9:21)"
       onSearchTextChange={setSearchText}
     >
-      {/* Today's schedule (if set) */}
-      {todayStart && leaveTime && remaining && (
+      {todayStatus && todayStart && (
         <List.Section title="📅 Today">
           <List.Item
             key={`today-${currentTime}`}
-            title={`🏠 Leave at ${leaveTime}`}
-            subtitle={formatRemainingLabel(remaining)}
+            title={`🏠 Leave at ${todayStatus.leaveTime}`}
+            subtitle={formatRemainingLabel(todayStatus.remaining)}
             icon={{
               source: Icon.Clock,
-              tintColor: remaining.isPast ? Color.Orange : Color.Blue,
+              tintColor: todayStatus.remaining.isPast
+                ? Color.Orange
+                : Color.Blue,
             }}
             accessories={[
               { tag: { value: todayStart, color: Color.SecondaryText } },
               {
                 tag: {
-                  value: `Work ${workHours}h Break ${breakMinutes}m`,
+                  value: `Work ${preferences.workHours}h Break ${preferences.breakMinutes}m`,
                   color: Color.SecondaryText,
                 },
               },
             ]}
             actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy" content={leaveTime} />
-                <Action
-                  title="Reset"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={handleClear}
-                />
-              </ActionPanel>
+              <TodayActions
+                leaveTime={todayStatus.leaveTime}
+                onClear={handleClear}
+              />
             }
           />
         </List.Section>
       )}
 
-      {/* Start now (current time) */}
       {!searchText && (
         <List.Section title="🚀 Start Now">
           <List.Item
             title={`Now (${currentTime})`}
             icon={{ source: Icon.Clock, tintColor: Color.Green }}
-            accessories={[
-              {
-                text: `→ ${calculateLeaveTime(currentTime, workHours, breakMinutes)}`,
-              },
-            ]}
+            accessories={[leavePreviewAccessory(currentTime, preferences)]}
             actions={
-              <ActionPanel>
-                <Action
-                  title="Select"
-                  icon={Icon.Check}
-                  onAction={() => handleSelect(currentTime)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Leave Time"
-                  content={calculateLeaveTime(
-                    currentTime,
-                    workHours,
-                    breakMinutes,
-                  )}
-                />
-              </ActionPanel>
+              <SelectStartTimeActions
+                leaveTime={nowStatus.leaveTime}
+                onSelect={() => handleSelect(currentTime)}
+              />
             }
           />
         </List.Section>
       )}
 
-      {/* Custom time (if valid input) */}
-      {customTime && !START_TIMES.includes(customTime) && (
+      {customStatus && customStartTime && (
         <List.Section title="✏️ Custom Time">
           <List.Item
-            title={customTime}
+            title={customStartTime}
             icon={{ source: Icon.Plus, tintColor: Color.Orange }}
-            accessories={[
-              {
-                text: `→ ${calculateLeaveTime(customTime, workHours, breakMinutes)}`,
-              },
-            ]}
+            accessories={[leavePreviewAccessory(customStartTime, preferences)]}
             actions={
-              <ActionPanel>
-                <Action
-                  title="Select"
-                  icon={Icon.Check}
-                  onAction={() => handleSelect(customTime)}
-                />
-              </ActionPanel>
+              <SelectStartTimeActions
+                leaveTime={customStatus.leaveTime}
+                onSelect={() => handleSelect(customStartTime)}
+                showCopy={false}
+              />
             }
           />
         </List.Section>
       )}
 
-      {/* Select start time */}
       <List.Section title="⏰ Select Start Time">
         {filteredTimes.map((time) => {
-          const leave = calculateLeaveTime(time, workHours, breakMinutes);
-          const rem = buildLeaveStatus(
+          const status = buildLeaveStatusFromPreferences(
             time,
-            workHours,
-            breakMinutes,
+            preferences,
             currentTime,
-          ).remaining;
+          );
           const isSelected = time === todayStart;
 
           return (
@@ -219,21 +142,18 @@ export default function Command() {
                   : Icon.Circle
               }
               accessories={[
-                { text: `→ ${leave}` },
-                { tag: rem.isPast ? "✓" : formatRemainingLabel(rem) },
+                leavePreviewAccessory(time, preferences),
+                {
+                  tag: status.remaining.isPast
+                    ? "✓"
+                    : formatRemainingLabel(status.remaining),
+                },
               ]}
               actions={
-                <ActionPanel>
-                  <Action
-                    title="Select"
-                    icon={Icon.Check}
-                    onAction={() => handleSelect(time)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Leave Time"
-                    content={leave}
-                  />
-                </ActionPanel>
+                <SelectStartTimeActions
+                  leaveTime={status.leaveTime}
+                  onSelect={() => handleSelect(time)}
+                />
               }
             />
           );

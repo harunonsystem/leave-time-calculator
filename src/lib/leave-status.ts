@@ -1,15 +1,8 @@
+import type { WorkPreferences } from "./preferences";
+import type { LeaveStatus } from "./types";
 import { calculateLeaveTime, calculateRemainingTime } from "./time-utils";
 
-type Remaining = {
-  hours: number;
-  minutes: number;
-  isPast: boolean;
-};
-
-export type LeaveStatus = {
-  leaveTime: string;
-  remaining: Remaining;
-};
+export type { LeaveStatus, RemainingTime } from "./types";
 
 export function buildLeaveStatus(
   startTime: string,
@@ -22,7 +15,31 @@ export function buildLeaveStatus(
   return { leaveTime, remaining };
 }
 
-export function formatRemainingLabel(remaining: Remaining): string {
+export function buildLeaveStatusFromPreferences(
+  startTime: string,
+  preferences: WorkPreferences,
+  currentTime?: string,
+): LeaveStatus {
+  return buildLeaveStatus(
+    startTime,
+    preferences.workHours,
+    preferences.breakMinutes,
+    currentTime,
+  );
+}
+
+export function leavePreviewAccessory(
+  startTime: string,
+  preferences: WorkPreferences,
+): { text: string } {
+  return {
+    text: `→ ${calculateLeaveTime(startTime, preferences.workHours, preferences.breakMinutes)}`,
+  };
+}
+
+export function formatRemainingLabel(
+  remaining: LeaveStatus["remaining"],
+): string {
   return remaining.isPast
     ? `${remaining.hours}h ${remaining.minutes}m overtime`
     : `${remaining.hours}h ${remaining.minutes}m left`;
