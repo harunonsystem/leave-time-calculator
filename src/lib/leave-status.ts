@@ -28,13 +28,17 @@ export function buildLeaveStatusFromPreferences(
   );
 }
 
+export function leavePreviewFromStatus(status: LeaveStatus): { text: string } {
+  return { text: `→ ${status.leaveTime}` };
+}
+
 export function leavePreviewAccessory(
   startTime: string,
   preferences: WorkPreferences,
 ): { text: string } {
-  return {
-    text: `→ ${calculateLeaveTime(startTime, preferences.workHours, preferences.breakMinutes)}`,
-  };
+  return leavePreviewFromStatus(
+    buildLeaveStatusFromPreferences(startTime, preferences),
+  );
 }
 
 export function formatRemainingLabel(

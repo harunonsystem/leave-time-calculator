@@ -8,10 +8,14 @@ import { getTodayStartTime } from "./storage";
 import { getCurrentTime } from "./time-utils";
 
 export async function refreshTopCommandSubtitle() {
-  await launchCommand({
-    name: "calculate-leave-time",
-    type: LaunchType.Background,
-  });
+  try {
+    await launchCommand({
+      name: "calculate-leave-time",
+      type: LaunchType.Background,
+    });
+  } catch (error) {
+    console.error("Failed to refresh command subtitle:", error);
+  }
 }
 
 export async function updateCurrentCommandSubtitle() {

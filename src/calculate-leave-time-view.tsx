@@ -1,18 +1,49 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
 import React, { useState } from "react";
 import { SelectStartTimeActions, TodayActions } from "./lib/leave-action-panel";
 import {
   buildLeaveStatusFromPreferences,
   formatRemainingLabel,
   leavePreviewAccessory,
+  leavePreviewFromStatus,
 } from "./lib/leave-status";
-import { getWorkPreferences } from "./lib/preferences";
+import { getWorkPreferences, type WorkPreferences } from "./lib/preferences";
 import { refreshTopCommandSubtitle } from "./lib/subtitle";
 import { buildDefaultStartTimes, parseCustomTime } from "./lib/time-utils";
 import { useCurrentTime } from "./lib/use-current-time";
 import { useTodayStartTime } from "./lib/use-today-start-time";
 
 const START_TIMES = buildDefaultStartTimes();
+
+type StartNowSectionProps = {
+  currentTime: string;
+  preferences: WorkPreferences;
+  onSelect: (startTime: string) => void;
+};
+
+function StartNowSection(props: StartNowSectionProps) {
+  const nowStatus = buildLeaveStatusFromPreferences(
+    props.currentTime,
+    props.preferences,
+    props.currentTime,
+  );
+
+  return (
+    <List.Section title="🚀 Start Now">
+      <List.Item
+        title={`Now (${props.currentTime})`}
+        icon={{ source: Icon.Clock, tintColor: Color.Green }}
+        accessories={[leavePreviewFromStatus(nowStatus)]}
+        actions={
+          <SelectStartTimeActions
+            leaveTime={nowStatus.leaveTime}
+            onSelect={() => props.onSelect(props.currentTime)}
+          />
+        }
+      />
+    </List.Section>
+  );
+}
 
 export default function Command() {
   const preferences = getWorkPreferences();
@@ -22,13 +53,31 @@ export default function Command() {
   const currentTime = useCurrentTime();
 
   const handleSelect = async (startTime: string) => {
-    await selectStartTime(startTime);
-    await refreshTopCommandSubtitle();
+    try {
+      await selectStartTime(startTime);
+      await refreshTopCommandSubtitle();
+    } catch (error) {
+      console.error("Failed to save start time:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save start time",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
 
   const handleClear = async () => {
-    await clearStartTime();
-    await refreshTopCommandSubtitle();
+    try {
+      await clearStartTime();
+      await refreshTopCommandSubtitle();
+    } catch (error) {
+      console.error("Failed to clear start time:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to clear start time",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
 
   const parsedCustomTime = parseCustomTime(searchText);
@@ -47,12 +96,6 @@ export default function Command() {
     ? START_TIMES.filter((time) => time.includes(searchText))
     : START_TIMES;
 
-  const nowStatus = buildLeaveStatusFromPreferences(
-    currentTime,
-    preferences,
-    currentTime,
-  );
-
   return (
     <List
       isLoading={isLoading}
@@ -62,7 +105,7 @@ export default function Command() {
       {todayStatus && todayStart && (
         <List.Section title="📅 Today">
           <List.Item
-            key={`today-${currentTime}`}
+            key="today"
             title={`🏠 Leave at ${todayStatus.leaveTime}`}
             subtitle={formatRemainingLabel(todayStatus.remaining)}
             icon={{
@@ -91,19 +134,11 @@ export default function Command() {
       )}
 
       {!searchText && (
-        <List.Section title="🚀 Start Now">
-          <List.Item
-            title={`Now (${currentTime})`}
-            icon={{ source: Icon.Clock, tintColor: Color.Green }}
-            accessories={[leavePreviewAccessory(currentTime, preferences)]}
-            actions={
-              <SelectStartTimeActions
-                leaveTime={nowStatus.leaveTime}
-                onSelect={() => handleSelect(currentTime)}
-              />
-            }
-          />
-        </List.Section>
+        <StartNowSection
+          currentTime={currentTime}
+          preferences={preferences}
+          onSelect={handleSelect}
+        />
       )}
 
       {customStatus && customStartTime && (
@@ -142,7 +177,7 @@ export default function Command() {
                   : Icon.Circle
               }
               accessories={[
-                leavePreviewAccessory(time, preferences),
+                leavePreviewFromStatus(status),
                 {
                   tag: status.remaining.isPast
                     ? "✓"

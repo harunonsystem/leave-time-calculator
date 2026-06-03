@@ -10,10 +10,16 @@ export function useTodayStartTime() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getTodayStartTime().then((time) => {
-      setTodayStart(time);
-      setIsLoading(false);
-    });
+    getTodayStartTime()
+      .then((time) => {
+        setTodayStart(time);
+      })
+      .catch((error) => {
+        console.error("Failed to load today's start time:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const selectStartTime = async (startTime: string) => {
