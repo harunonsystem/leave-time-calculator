@@ -1,9 +1,37 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
+	buildDefaultStartTimes,
 	calculateLeaveTime,
 	calculateRemainingTime,
 	formatTimeString,
+	parseCustomTime,
 } from "../src/lib/time-utils";
+
+describe("parseCustomTime", () => {
+	test("parses single-digit hour", () => {
+		expect(parseCustomTime("9:21")).toBe("09:21");
+	});
+
+	test("parses two-digit hour", () => {
+		expect(parseCustomTime("09:21")).toBe("09:21");
+	});
+
+	test("returns null for invalid format", () => {
+		expect(parseCustomTime("9")).toBeNull();
+		expect(parseCustomTime("9:2")).toBeNull();
+		expect(parseCustomTime("25:00")).toBeNull();
+		expect(parseCustomTime("12:60")).toBeNull();
+	});
+});
+
+describe("buildDefaultStartTimes", () => {
+	test("includes 7:00 through 13:45 in 15-minute steps", () => {
+		const times = buildDefaultStartTimes();
+		expect(times[0]).toBe("07:00");
+		expect(times[times.length - 1]).toBe("13:45");
+		expect(times).toHaveLength(7 * 4);
+	});
+});
 
 describe("formatTimeString", () => {
 	test("pads single digit hours to two digits", () => {

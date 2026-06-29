@@ -1,11 +1,25 @@
-import { updateCommandMetadata } from "@raycast/api";
-import { buildLeaveStatus, formatTopSubtitle } from "./leave-status";
+import { LaunchType, launchCommand, updateCommandMetadata } from "@raycast/api";
+import {
+  buildLeaveStatusFromPreferences,
+  formatTopSubtitle,
+} from "./leave-status";
 import { getWorkPreferences } from "./preferences";
 import { getTodayStartTime } from "./storage";
-import { formatTimeString } from "./time-utils";
+import { getCurrentTime } from "./time-utils";
+
+export async function refreshTopCommandSubtitle() {
+  try {
+    await launchCommand({
+      name: "calculate-leave-time",
+      type: LaunchType.Background,
+    });
+  } catch (error) {
+    console.error("Failed to refresh command subtitle:", error);
+  }
+}
 
 export async function updateCurrentCommandSubtitle() {
-  const { workHours, breakMinutes } = getWorkPreferences();
+  const preferences = getWorkPreferences();
   const todayStart = await getTodayStartTime();
 
   if (!todayStart) {
@@ -13,13 +27,10 @@ export async function updateCurrentCommandSubtitle() {
     return;
   }
 
-  const now = new Date();
-  const currentTime = formatTimeString(now.getHours(), now.getMinutes());
-  const status = buildLeaveStatus(
+  const status = buildLeaveStatusFromPreferences(
     todayStart,
-    workHours,
-    breakMinutes,
-    currentTime,
+    preferences,
+    getCurrentTime(),
   );
   await updateCommandMetadata({ subtitle: formatTopSubtitle(status) });
 }
