@@ -41,8 +41,9 @@
       "groupName": "testing"
     },
     {
-      "description": "GitHub Actions monthly",
+      "description": "GitHub Actions monthly (majors included: CI-only, failures are visible)",
       "matchManagers": ["github-actions"],
+      "automerge": true,
       "minimumReleaseAge": "7 days",
       "schedule": ["before 4am on the first day of the month"]
     }
