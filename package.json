@@ -61,12 +61,12 @@
 		}
 	],
 	"dependencies": {
-		"@raycast/api": "^1.104.1",
-		"@raycast/utils": "^2.2.2",
+		"@raycast/api": "^1.104.25",
+		"@raycast/utils": "^2.3.3",
 		"react": "^19.2.3"
 	},
 	"devDependencies": {
-		"@raycast/eslint-config": "^2.1.1",
+		"@raycast/eslint-config": "^2.2.0",
 		"@types/bun": "latest",
 		"@types/node": "^20.19.43",
 		"@types/react": "^19.3.0",
