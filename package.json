@@ -68,9 +68,9 @@
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.1.1",
 		"@types/bun": "latest",
-		"@types/node": "^20.17.6",
-		"@types/react": "^19.2.7",
-		"typescript": "^5.7.2",
+		"@types/node": "^20.19.43",
+		"@types/react": "^19.3.0",
+		"typescript": "^5.9.3",
 		"vitest": "^4.1.12"
 	},
 	"scripts": {
