@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "platformAutomerge": false,
   "extends": [
     "local>harunonsystem/.github:renovate-config",
     "helpers:pinGitHubActionDigestsToSemver",
@@ -9,7 +10,6 @@
   "schedule": ["before 4am on Monday"],
   "minimumReleaseAge": "3 days",
   "automerge": true,
-  "platformAutomerge": true,
   "labels": ["dependencies"],
   "packageRules": [
     {
