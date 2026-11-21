@@ -73,5 +73,12 @@
         "before 4am on the first day of the month"
       ]
     }
-  ]
+  ],
+  "npm": {
+    "lockFileMaintenance": {
+      "schedule": [
+        "before 4am on Monday"
+      ]
+    }
+  }
 }
